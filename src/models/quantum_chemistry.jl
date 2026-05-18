@@ -35,7 +35,7 @@ end
 
 function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     basis_size = size(K, 1)
-    half_basis_size = Int(ceil(basis_size / 2))
+    half_basis_size = ceil(Int, basis_size / 2)
 
     # the phsyical space
     psp = Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)](
@@ -49,21 +49,21 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
         psp * Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)]((-1, 1 // 2, 1) => 1),
         psp
     )
-    blocks(ap)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .*= -sqrt(2)
-    blocks(ap)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .*= 1
+    block(ap, U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0)) .*= -sqrt(2)
+    block(ap, U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1)) .*= 1
 
     bm = ones(
         Elt, psp,
         Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)]((-1, 1 // 2, 1) => 1) * psp
     )
-    blocks(bm)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .*= sqrt(2)
-    blocks(bm)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .*= -1
+    block(bm, U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0)) .*= sqrt(2)
+    block(bm, U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1)) .*= -1
 
     # this transposition is easier to reason about in a planar way
-    am = transpose(ap', (2, 1), (3,))
-    bp = transpose(bm', (1,), (3, 2))
-    ap = transpose(ap, (3, 1), (2,))
-    bm = transpose(bm, (2,), (3, 1))
+    am = transpose(ap', ((2, 1), (3,)))
+    bp = transpose(bm', ((1,), (3, 2)))
+    ap = transpose(ap, ((3, 1), (2,)))
+    bm = transpose(bm, ((2,), (3, 1)))
 
     @plansor b_derp[-1 -2; -3] := bp[1; 2 -2] * τ[-3 -1; 2 1]
     Lmap_ap_to_bp = inv(ap' * ap) * ap' * b_derp
@@ -72,27 +72,27 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     Lmap_am_to_bm = inv(am' * am) * am' * b_derp
     @assert norm(am * Lmap_am_to_bm - b_derp) < 1.0e-12
 
-    Rmap_bp_to_ap = transpose(Lmap_am_to_bm', (2,), (1,))
-    Rmap_bm_to_am = transpose(Lmap_ap_to_bp', (2,), (1,))
+    Rmap_bp_to_ap = transpose(Lmap_am_to_bm', ((2,), (1,)))
+    Rmap_bm_to_am = transpose(Lmap_ap_to_bp', ((2,), (1,)))
     @plansor a_derp[-1 -2; -3] := bp[1; -1 2] * Rmap_bp_to_ap[1; 3] * τ[2 3; -3 -2]
     @assert norm(a_derp - ap) < 1.0e-12
     @plansor a_derp[-1 -2; -3] := bm[1; -1 2] * Rmap_bm_to_am[1; 3] * τ[2 3; -3 -2]
     @assert norm(a_derp - am) < 1.0e-12
 
-    h_pm = TensorMap(ones, Elt, psp, psp)
-    blocks(h_pm)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .= 0
-    blocks(h_pm)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .= 1
-    blocks(h_pm)[(U1Irrep(2) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .= 2
+    h_pm = ones(Elt, psp, psp)
+    block(h_pm, U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0)) .= 0
+    block(h_pm, U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1)) .= 1
+    block(h_pm, U1Irrep(2) ⊠ SU2Irrep(0) ⊠ FermionParity(0)) .= 2
 
     @plansor o_derp[-1 -2; -3 -4] := am[-1 1; -3] * ap[1 -2; -4]
-    h_pm_derp = transpose(h_pm, (2, 1), ())
+    h_pm_derp = transpose(h_pm, ((2, 1), ()))
     Lmap_apam_to_pm = inv(o_derp' * o_derp) * o_derp' * h_pm_derp
     @assert norm(o_derp * Lmap_apam_to_pm - h_pm_derp) < 1.0e-12
 
     @plansor o_derp[-1 -2; -3 -4] := bm[-1; -3 1] * bp[-2; 1 -4]
-    h_pm_derp2 = transpose(h_pm, (), (2, 1))
+    h_pm_derp2 = transpose(h_pm, ((), (2, 1)))
     Rmap_bpbm_to_pm = h_pm_derp2 * o_derp' * inv(o_derp * o_derp')
-    @assert norm(transpose(h_pm, (), (2, 1)) - Rmap_bpbm_to_pm * o_derp) < 1.0e-12
+    @assert norm(transpose(h_pm, ((), (2, 1))) - Rmap_bpbm_to_pm * o_derp) < 1.0e-12
 
     h_ppmm = h_pm * h_pm - h_pm
 
