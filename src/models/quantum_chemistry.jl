@@ -129,14 +129,14 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     # pure onsite interactions:
     for i in 1:basis_size
         # onsite kinetic part
-        hamdat[i, 1, end] += K[i, i] * add_util_leg(h_pm)
+        hamdat[i, 1, end] += K[i, i] * MPSKit.add_util_leg(h_pm)
 
         # onsite electronic part
-        hamdat[i, 1, end] += V[i, i, i, i] * add_util_leg(h_ppmm)
+        hamdat[i, 1, end] += V[i, i, i, i] * MPSKit.add_util_leg(h_ppmm)
     end
 
     # fill indmap_1L and indmap_1R
-    ut = Tensor(ones, oneunit(psp))
+    ut = ones(oneunit(psp))
     @plansor ut_ap[-1 -2; -3 -4] := ut[-1] * ap[-3 -2; -4]
     @plansor ut_am[-1 -2; -3 -4] := ut[-1] * am[-3 -2; -4]
     @plansor bp_ut[-1 -2; -3 -4] := bp[-1; -3 -2] * conj(ut[-4])
