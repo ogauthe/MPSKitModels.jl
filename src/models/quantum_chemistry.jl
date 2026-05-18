@@ -161,10 +161,10 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
 
     # indmap_2 onsite part
     # we need pp, mm, pm
-    pp_f = isometry(fuse(_lastspace(ap)' * _lastspace(ap)'), _lastspace(ap)' * _lastspace(ap)')
-    mm_f = isometry(fuse(_lastspace(am)' * _lastspace(am)'), _lastspace(am)' * _lastspace(am)')
-    mp_f = isometry(fuse(_lastspace(am)' * _lastspace(ap)'), _lastspace(am)' * _lastspace(ap)')
-    pm_f = isometry(fuse(_lastspace(ap)' * _lastspace(am)'), _lastspace(ap)' * _lastspace(am)')
+    pp_f = isometry(fuse(MPSKit._lastspace(ap)' * MPSKit._lastspace(ap)'), MPSKit._lastspace(ap)' * MPSKit._lastspace(ap)')
+    mm_f = isometry(fuse(MPSKit._lastspace(am)' * MPSKit._lastspace(am)'), MPSKit._lastspace(am)' * MPSKit._lastspace(am)')
+    mp_f = isometry(fuse(MPSKit._lastspace(am)' * MPSKit._lastspace(ap)'), MPSKit._lastspace(am)' * MPSKit._lastspace(ap)')
+    pm_f = isometry(fuse(MPSKit._lastspace(ap)' * MPSKit._lastspace(am)'), MPSKit._lastspace(ap)' * MPSKit._lastspace(am)')
 
     @plansor ut_apap[-1 -2; -3 -4] := ut[-1] * ap[-3 1; 3] * ap[1 -2; 4] *
         conj(pp_f[-4; 3 4])
@@ -211,8 +211,8 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     end
 
     # indmap_2 disconnected part
-    iso_pp = isomorphism(_lastspace(ap)', _lastspace(ap)')
-    iso_mm = isomorphism(_lastspace(am)', _lastspace(am)')
+    iso_pp = isomorphism(MPSKit._lastspace(ap)', MPSKit._lastspace(ap)')
+    iso_mm = isomorphism(MPSKit._lastspace(am)', MPSKit._lastspace(am)')
 
     @plansor p_ap[-1 -2; -3 -4] := iso_pp[-1; 1] * τ[1 2; -3 3] * ap[2 -2; 4] * conj(pp_f[-4; 3 4])
     @plansor m_ap[-1 -2; -3 -4] := iso_mm[-1; 1] * τ[1 2; -3 3] * ap[2 -2; 4] * conj(mp_f[-4; 3 4])
