@@ -38,7 +38,7 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     half_basis_size = Int(ceil(basis_size / 2))
 
     # the phsyical space
-    psp = Vect[(Irrep[U₁] ⊠ Irrep[SU₂] ⊠ FermionParity)](
+    psp = Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)](
         (0, 0, 0) => 1,
         (1, 1 // 2, 1) => 1,
         (2, 0, 0) => 1
@@ -46,18 +46,18 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
 
     ap = ones(
         Elt,
-        psp * Vect[(Irrep[U₁] ⊠ Irrep[SU₂] ⊠ FermionParity)]((-1, 1 // 2, 1) => 1),
+        psp * Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)]((-1, 1 // 2, 1) => 1),
         psp
     )
-    blocks(ap)[(U₁(0) ⊠ SU₂(0) ⊠ FermionParity(0))] .*= -sqrt(2)
-    blocks(ap)[(U₁(1) ⊠ SU₂(1 // 2) ⊠ FermionParity(1))] .*= 1
+    blocks(ap)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .*= -sqrt(2)
+    blocks(ap)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .*= 1
 
     bm = ones(
         Elt, psp,
-        Vect[(Irrep[U₁] ⊠ Irrep[SU₂] ⊠ FermionParity)]((-1, 1 // 2, 1) => 1) * psp
+        Vect[(U1Irrep ⊠ SU2Irrep ⊠ FermionParity)]((-1, 1 // 2, 1) => 1) * psp
     )
-    blocks(bm)[(U₁(0) ⊠ SU₂(0) ⊠ FermionParity(0))] .*= sqrt(2)
-    blocks(bm)[(U₁(1) ⊠ SU₂(1 // 2) ⊠ FermionParity(1))] .*= -1
+    blocks(bm)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .*= sqrt(2)
+    blocks(bm)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .*= -1
 
     # this transposition is easier to reason about in a planar way
     am = transpose(ap', (2, 1), (3,))
@@ -80,9 +80,9 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
     @assert norm(a_derp - am) < 1.0e-12
 
     h_pm = TensorMap(ones, Elt, psp, psp)
-    blocks(h_pm)[(U₁(0) ⊠ SU₂(0) ⊠ FermionParity(0))] .= 0
-    blocks(h_pm)[(U₁(1) ⊠ SU₂(1 // 2) ⊠ FermionParity(1))] .= 1
-    blocks(h_pm)[(U₁(2) ⊠ SU₂(0) ⊠ FermionParity(0))] .= 2
+    blocks(h_pm)[(U1Irrep(0) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .= 0
+    blocks(h_pm)[(U1Irrep(1) ⊠ SU2Irrep(1 // 2) ⊠ FermionParity(1))] .= 1
+    blocks(h_pm)[(U1Irrep(2) ⊠ SU2Irrep(0) ⊠ FermionParity(0))] .= 2
 
     @plansor o_derp[-1 -2; -3 -4] := am[-1 1; -3] * ap[1 -2; -4]
     h_pm_derp = transpose(h_pm, (2, 1), ())
