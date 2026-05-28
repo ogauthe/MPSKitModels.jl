@@ -538,7 +538,7 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
 
         # i R m j
         @plansor iRmj[-1 -2; -3 -4] := ut[-1] * am[-3 -2; -4]
-        hamdat[k, map_3[1, i, 2, j], indmap_1R[1, l]] += V[i, l, k, j] * iRmj
+        hamdat[k, indmap_2R[1, i, 2, j], indmap_1R[1, l]] += V[i, l, k, j] * iRmj
 
         # j i m R
         @plansor jimR[-1 -2; -3 -4] := pp_f[-1; 1 2] * τ[3 2; -4 -2] * bm[1; -3 3]
