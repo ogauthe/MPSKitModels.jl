@@ -338,8 +338,6 @@ function mapped_quantum_chemistry_hamiltonian(E0, K, V, Elt = ComplexF64)
         hamdat[i, 1, end] -= V[j, i, j, i] * MPSKit.add_util_leg(h_pm)
 
         # p m | . p m .
-        @show space(hamdat[j, indmap_2L[2, i, 1, i], end])
-        @show space(_pm_)
         hamdat[j, indmap_2L[2, i, 1, i], end] += V[i, j, j, i] * _pm_
 
         # p m | p . . m
